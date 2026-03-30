@@ -1,0 +1,10 @@
+{
+  "id": "section-prefix",
+  "name": "Section Prefix",
+  "version": "1.0.0",
+  "minAppVersion": "1.0.0",
+  "description": "Renders numeric section prefixes (e.g. '2.3') in headings as small inline badges instead of full-size text.",
+  "author": "Felix Tesche",
+  "authorUrl": "",
+  "isDesktopOnly": false
+}
