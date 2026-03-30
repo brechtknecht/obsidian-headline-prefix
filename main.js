@@ -19,18 +19,27 @@ const STYLE_ID = 'section-prefix-styles';
 
 const CSS = `
 /* ── Section Prefix Plugin ─────────────────────────────── */
+
+/* Give headings and inline-title a positioning context */
+h1, h2, h3, h4, h5, h6, .inline-title {
+  position: relative;
+}
+
 .sp-prefix {
-  font-size: 0.36em;
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  padding-top: 0.4em;
+
+  font-size: 0.28em;
   font-weight: 400;
-  opacity: 0.35;
-  letter-spacing: 0.04em;
-  margin-right: 0.3em;
-  vertical-align: middle;
-  display: inline-block;
+  opacity: 0.38;
+  letter-spacing: 0.05em;
   line-height: 1;
   font-style: normal;
   font-family: inherit;
-  /* prevent the span from being selected when renaming inline-title */
+  white-space: nowrap;
+
   user-select: none;
   -webkit-user-select: none;
 }
@@ -50,12 +59,18 @@ function processEl(el) {
   // Clear and rebuild
   while (el.firstChild) el.removeChild(el.firstChild);
 
+  // "0." prefix: show title only, no badge
+  if (prefix === '0.' || prefix === '0') {
+    el.appendChild(document.createTextNode(title));
+    return;
+  }
+
   const prefixSpan = document.createElement('span');
   prefixSpan.className = 'sp-prefix';
   prefixSpan.textContent = prefix;
 
   el.appendChild(prefixSpan);
-  el.appendChild(document.createTextNode(' ' + title));
+  el.appendChild(document.createTextNode(title));
 }
 
 function processContainer(root) {
@@ -120,7 +135,7 @@ module.exports = class SectionPrefixPlugin extends Plugin {
       parent.childNodes.forEach(node => {
         if (node !== span) rest += node.textContent;
       });
-      parent.textContent = prefix + ' ' + rest.trim();
+      parent.textContent = prefix + ' ' + rest;
     });
   }
 
