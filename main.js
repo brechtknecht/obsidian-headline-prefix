@@ -80,6 +80,7 @@ h1, h2, h3, h4, h5, h6, .inline-title {
 
 function processEl(el) {
   if (!el) return;
+  if (el._spEditing) return;
   // Already processed
   if (el.querySelector(':scope > .sp-prefix')) return;
 
@@ -108,6 +109,24 @@ function processEl(el) {
 
   el.appendChild(prefixSpan);
   el.appendChild(document.createTextNode(title));
+
+  if (dateMatch && !el._spHandlersAttached) {
+    el._spHandlersAttached = true;
+    const rawText = prefix + ' ' + title;
+
+    el.addEventListener('focus', function () {
+      if (!this.isContentEditable) return;
+      this._spEditing = true;
+      this.textContent = rawText;
+    });
+
+    el.addEventListener('blur', function () {
+      if (!this._spEditing) return;
+      this._spEditing = false;
+      // Re-apply formatting after Obsidian updates the DOM on file rename
+      setTimeout(() => { if (!this._spEditing) processEl(this); }, 50);
+    });
+  }
 }
 
 function processContainer(root) {
