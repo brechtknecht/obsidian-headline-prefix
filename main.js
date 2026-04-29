@@ -105,25 +105,25 @@ function processEl(el) {
   const prefixSpan = document.createElement('span');
   prefixSpan.className = 'sp-prefix';
   prefixSpan.textContent = displayPrefix;
-  if (dateMatch) prefixSpan.dataset.spRaw = prefix;
 
   el.appendChild(prefixSpan);
   el.appendChild(document.createTextNode(title));
 
-  if (dateMatch && !el._spHandlersAttached) {
+  // Always keep raw text current — el may be reused across notes by Obsidian
+  el._spRawText = prefix + ' ' + title;
+
+  if (!el._spHandlersAttached) {
     el._spHandlersAttached = true;
-    const rawText = prefix + ' ' + title;
 
     el.addEventListener('focus', function () {
       if (!this.isContentEditable) return;
       this._spEditing = true;
-      this.textContent = rawText;
+      this.textContent = this._spRawText; // reads current value, not stale closure
     });
 
     el.addEventListener('blur', function () {
       if (!this._spEditing) return;
       this._spEditing = false;
-      // Re-apply formatting after Obsidian updates the DOM on file rename
       setTimeout(() => { if (!this._spEditing) processEl(this); }, 50);
     });
   }
@@ -186,12 +186,8 @@ module.exports = class SectionPrefixPlugin extends Plugin {
     document.querySelectorAll('.sp-prefix').forEach(span => {
       const parent = span.parentElement;
       if (!parent) return;
-      const prefix = span.dataset.spRaw ?? span.textContent;
-      let rest = '';
-      parent.childNodes.forEach(node => {
-        if (node !== span) rest += node.textContent;
-      });
-      parent.textContent = prefix + ' ' + rest;
+      parent.textContent = parent._spRawText ?? (span.textContent + ' ' + [...parent.childNodes]
+        .filter(n => n !== span).map(n => n.textContent).join(''));
     });
   }
 
