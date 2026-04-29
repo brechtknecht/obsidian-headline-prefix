@@ -117,8 +117,9 @@ function processEl(el) {
 
     el.addEventListener('focus', function () {
       if (!this.isContentEditable) return;
+      if (!this.querySelector(':scope > .sp-prefix')) return; // unformatted note — don't intercept
       this._spEditing = true;
-      this.textContent = this._spRawText; // reads current value, not stale closure
+      this.textContent = this._spRawText;
     });
 
     el.addEventListener('blur', function () {
